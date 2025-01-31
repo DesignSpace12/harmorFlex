@@ -1,0 +1,230 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التسجيل - MahdiPC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            animation: scaleUp 0.5s forwards;
+        }
+
+        @keyframes scaleUp {
+            to { transform: scale(1); }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-color: #1e3c72;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #1e3c72;
+            outline: none;
+            box-shadow: 0 0 8px rgba(30, 60, 114, 0.3);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .password-toggle {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('login')">تسجيل الدخول</div>
+            <div class="tab" onclick="switchTab('signup')">إنشاء حساب</div>
+        </div>
+
+        <div id="loginForm">
+            <div class="form-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+            </div>
+            <div class="form-group">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="loginPassword" placeholder="كلمة المرور">
+                <i class="fas fa-eye password-toggle" onclick="togglePassword('loginPassword')"></i>
+            </div>
+            <button onclick="login()">الدخول</button>
+        </div>
+
+        <div id="signupForm" style="display: none;">
+            <div class="form-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="signupUsername" placeholder="اسم مستخدم جديد">
+            </div>
+            <div class="form-group">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="signupPassword" placeholder="كلمة مرور جديدة">
+                <i class="fas fa-eye password-toggle" onclick="togglePassword('signupPassword')"></i>
+            </div>
+            <button onclick="signup()">إنشاء حساب</button>
+        </div>
+
+        <div class="alert" id="alert"></div>
+    </div>
+
+    <script>
+        // تهيئة التخزين المحلي
+        if(!localStorage.getItem('users')) {
+            const users = [
+                { username: 'Mahdi', password: 'mahdipc', isAdmin: true }
+            ];
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.type = field.type === 'password' ? 'text' : 'password';
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 3000);
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const users = JSON.parse(localStorage.getItem('users'));
+
+            const user = users.find(u => u.username === username && u.password === password);
+            if(user) {
+                if(user.isAdmin) {
+                    window.location.href = 'users.html';
+                } else {
+                    showAlert('مرحبا!', 'success');
+                }
+            } else {
+                showAlert('بيانات الدخول غير صحيحة!', 'error');
+            }
+        }
+
+        function signup() {
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            const users = JSON.parse(localStorage.getItem('users'));
+
+            if(users.some(u => u.username === username)) {
+                showAlert('اسم المستخدم موجود مسبقا!', 'error');
+                return;
+            }
+
+            users.push({ username, password, isAdmin: false });
+            localStorage.setItem('users', JSON.stringify(users));
+            showAlert('تم إنشاء الحساب بنجاح!', 'success');
+            switchTab('login');
+        }
+    </script>
+</body>
+</html>
